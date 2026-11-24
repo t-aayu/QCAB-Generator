@@ -133,9 +133,9 @@ gradle :app:bundleRelease
 
 ---
 
-## Publishing to GitHub
+## Publishing & Releases
 
-See [PUBLISHING.md](PUBLISHING.md) for a step-by-step guide to pushing this repository to `https://github.com/t-aayu/QCAB-Generator`, enabling GitHub Actions CI, and publishing versioned APK releases.
+- See [PUBLISHING.md](PUBLISHING.md) for pushing to `https://github.com/t-aayu/QCAB-Generator`, configuring signing secrets (`RELEASE_KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`), and cutting automated APK releases via `.github/workflows/release.yml` when pushing `v*` tags.
 
 ---
 

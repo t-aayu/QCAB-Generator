@@ -46,10 +46,10 @@ git push -u origin main
 ## 4. GitHub Secrets & CI Configuration
 
 - **Debug CI (`.github/workflows/android-ci.yml`):** **No GitHub Secrets are required.** The workflow generates a temporary `debug.keystore` automatically, and this app runs 100% offline (no `GEMINI_API_KEY` or Firebase secrets are needed).
-- **Signed Release Builds (Optional):** If you later add a release build job to GitHub Actions, `app/build.gradle.kts` reads these environment variables:
-  - `STORE_PASSWORD` — password for your `.jks` keystore
-  - `KEY_PASSWORD` — password for the `upload` key alias
-  - `KEYSTORE_PATH` — path to the `.jks` file (defaults to `my-upload-key.jks` in the project root)
+- **Automated APK Release (`.github/workflows/release.yml`):** Add these **3 repository secrets** under **Settings → Secrets and variables → Actions** before tagging a release:
+  1. `RELEASE_KEYSTORE_BASE64` — base64-encoded `.jks` upload keystore (with key alias `upload`)
+  2. `STORE_PASSWORD` — keystore password
+  3. `KEY_PASSWORD` — `upload` key password
 
 Once pushed, open **Actions** in your GitHub repository (`https://github.com/t-aayu/QCAB-Generator/actions`).
 The **Android CI** workflow (`.github/workflows/android-ci.yml`) will automatically:
@@ -60,11 +60,11 @@ The **Android CI** workflow (`.github/workflows/android-ci.yml`) will automatica
 
 ---
 
-## 5. Create a Release with a Signed APK (Optional)
+## 5. Create a Release with a Signed APK
 
 ### Generate an Upload Keystore (One-Time Setup)
 
-Keep this file strictly outside your Git repository and backed up securely:
+Keep this file strictly outside your Git repository and backed up securely (the key alias must be `upload` to match `app/build.gradle.kts`):
 
 ```bash
 keytool -genkeypair -v \
@@ -73,7 +73,28 @@ keytool -genkeypair -v \
   -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-### Build the Signed Release APK
+Encode it to base64 to paste into the `RELEASE_KEYSTORE_BASE64` GitHub Secret:
+
+```bash
+# Linux
+base64 -w 0 ../my-upload-key.jks
+
+# macOS
+base64 -i ../my-upload-key.jks | tr -d '\n'
+```
+
+### Option A: Automated Release via GitHub Actions (Recommended)
+
+Push a version tag (e.g., `v1.0.0`) and `.github/workflows/release.yml` will automatically run tests, build the signed `.apk` and `.aab`, generate `SHA256SUMS.txt`, and publish a GitHub Release:
+
+```bash
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+```
+
+You can also trigger a release manually from **Actions → Release APK → Run workflow**.
+
+### Option B: Build Signed Release Locally
 
 ```bash
 export KEYSTORE_PATH="../my-upload-key.jks"
@@ -85,20 +106,6 @@ gradle :app:assembleRelease
 
 The signed APK will be generated at:
 `app/build/outputs/apk/release/app-release.apk`
-
-### Tag and Publish on GitHub Releases
-
-```bash
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
-```
-
-Then go to **Releases → Draft a new release** on GitHub:
-1. Select tag `v1.0.0`.
-2. Title it `QCAB Generator v1.0.0`.
-3. Paste the release notes from `CHANGELOG.md`.
-4. Drag and drop `app-release.apk` (renamed e.g. `qcab-generator-v1.0.0.apk`) into the release binaries box.
-5. Click **Publish release**.
 
 ---
 
