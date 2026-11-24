@@ -7,7 +7,7 @@ This guide walks through publishing this Android project to your GitHub account 
 ## 1. Create the Repository on GitHub
 
 1. Sign in to GitHub as **t-aayu** and navigate to [github.com/new](https://github.com/new).
-2. Set the **Repository name** to `qcab-generator` (or update the badge/clone URLs in `README.md` if you choose a different name).
+2. Set the **Repository name** to `QCAB-Generator`.
 3. Add a short description:
    > Native Android app to generate standard UPSC CSE Question cum Answer Booklets (QCAB) as printable A4 PDFs.
 4. Choose **Public** (recommended for open source) or **Private**.
@@ -37,15 +37,21 @@ git branch -M main
 git add .
 git status   # Double-check no .env or .jks/.keystore files appear
 git commit -m "Initial release: UPSC CSE QCAB Generator Android app"
-git remote add origin https://github.com/t-aayu/qcab-generator.git
+git remote add origin https://github.com/t-aayu/QCAB-Generator.git
 git push -u origin main
 ```
 
 ---
 
-## 4. Verify GitHub Actions CI
+## 4. GitHub Secrets & CI Configuration
 
-Once pushed, open **Actions** in your GitHub repository (`https://github.com/t-aayu/qcab-generator/actions`).
+- **Debug CI (`.github/workflows/android-ci.yml`):** **No GitHub Secrets are required.** The workflow generates a temporary `debug.keystore` automatically, and this app runs 100% offline (no `GEMINI_API_KEY` or Firebase secrets are needed).
+- **Signed Release Builds (Optional):** If you later add a release build job to GitHub Actions, `app/build.gradle.kts` reads these environment variables:
+  - `STORE_PASSWORD` — password for your `.jks` keystore
+  - `KEY_PASSWORD` — password for the `upload` key alias
+  - `KEYSTORE_PATH` — path to the `.jks` file (defaults to `my-upload-key.jks` in the project root)
+
+Once pushed, open **Actions** in your GitHub repository (`https://github.com/t-aayu/QCAB-Generator/actions`).
 The **Android CI** workflow (`.github/workflows/android-ci.yml`) will automatically:
 1. Generate a CI debug keystore.
 2. Build the debug APK (`assembleDebug`).

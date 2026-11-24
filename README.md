@@ -4,7 +4,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.x-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Android CI](https://github.com/t-aayu/qcab-generator/actions/workflows/android-ci.yml/badge.svg)](https://github.com/t-aayu/qcab-generator/actions/workflows/android-ci.yml)
+[![Android CI](https://github.com/t-aayu/QCAB-Generator/actions/workflows/android-ci.yml/badge.svg)](https://github.com/t-aayu/QCAB-Generator/actions/workflows/android-ci.yml)
 
 A native Android application built with **Kotlin** and **Jetpack Compose** for generating standard **UPSC CSE Question cum Answer Booklets (QCAB)** as printable A4 PDFs—completely offline and with zero storage permissions required.
 
@@ -85,8 +85,8 @@ app/src/main/java/com/example/
 ### Clone & Run Locally
 
 ```bash
-git clone https://github.com/t-aayu/qcab-generator.git
-cd qcab-generator
+git clone https://github.com/t-aayu/QCAB-Generator.git
+cd QCAB-Generator
 ```
 
 1. Open the project folder in **Android Studio**.
@@ -135,7 +135,7 @@ gradle :app:bundleRelease
 
 ## Publishing to GitHub
 
-See [PUBLISHING.md](PUBLISHING.md) for a step-by-step guide to pushing this repository to `https://github.com/t-aayu/qcab-generator`, enabling GitHub Actions CI, and publishing versioned APK releases.
+See [PUBLISHING.md](PUBLISHING.md) for a step-by-step guide to pushing this repository to `https://github.com/t-aayu/QCAB-Generator`, enabling GitHub Actions CI, and publishing versioned APK releases.
 
 ---
 
