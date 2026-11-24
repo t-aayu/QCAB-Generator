@@ -79,7 +79,7 @@ app/src/main/java/com/example/
 ### Prerequisites
 
 - **Android Studio** (Meerkat / Ladybug or newer) with **Android SDK 36** installed
-- **JDK 17** or newer
+- **JDK 21** or newer
 - Android device or emulator running **Android 7.0 (API 24)** or higher
 
 ### Clone & Run Locally
