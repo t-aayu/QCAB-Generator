@@ -1,0 +1,71 @@
+<resources>
+    <string name="app_name">QCAB Generator</string>
+    <string name="header_title">UPSC CSE QCAB Generator</string>
+    <string name="header_subtitle">Standard Question cum Answer Booklets</string>
+
+    <!-- Setup Screen -->
+    <string name="setup_title">Test Configuration</string>
+    <string name="setup_subtitle">Set up your booklet\'s basic parameters.</string>
+    <string name="label_test_name">Test Name / Footer Stamp</string>
+    <string name="label_optional">(Optional)</string>
+    <string name="placeholder_test_name">e.g. VisionIAS-2024-GS1 (Leave blank for none)</string>
+    <string name="helper_test_name">If provided, this appears at the bottom left of every page.</string>
+    <string name="label_num_questions">Initial Number of Questions</string>
+    <string name="helper_num_questions">You can add or remove questions on the next screen without losing data.</string>
+    <string name="error_min_questions">Number of questions must be at least 1.</string>
+    <string name="error_max_questions">Maximum 20 questions can be generated at once.</string>
+    <string name="btn_continue_questions">Continue to Questions</string>
+    <string name="preview_card_title">Official A4 Margin Spec</string>
+    <string name="preview_card_margin_warning">Candidates must not write on this margin</string>
+
+    <!-- Questions Screen -->
+    <string name="btn_back_setup">Setup</string>
+    <string name="untitled_test">Untitled Test</string>
+    <string name="question_details_title">Question Details</string>
+    <string name="cd_remove_question">Remove this question</string>
+    <string name="label_question_text">Question Text</string>
+    <string name="placeholder_question_text">Type the question content…</string>
+    <string name="divider_or">OR</string>
+    <string name="label_attach_image">Attach Image</string>
+    <string name="label_attach_image_hint">(Equations / Diagrams)</string>
+    <string name="btn_choose_image">Choose Image</string>
+    <string name="btn_replace_image">Replace Image</string>
+    <string name="btn_undo">Undo</string>
+    <string name="btn_clear_image">Clear Image</string>
+    <string name="btn_clear_text">Clear Text</string>
+    <string name="cd_remove_image">Remove attached image</string>
+    <string name="cd_attached_image">Attached question diagram or equation</string>
+    <string name="label_marks_stamp">Marks Stamp</string>
+    <string name="placeholder_marks_stamp">e.g. 10 Marks, 2023</string>
+    <string name="label_pages_required">Pages Required</string>
+    <string name="btn_add_question">Add Another Question</string>
+    <string name="btn_max_questions_reached">Maximum Questions Reached (20)</string>
+    <string name="btn_generate_pdf">Generate QCAB PDF</string>
+    <string name="btn_building_pdf">Building PDF…</string>
+    <string name="cd_decrease">Decrease</string>
+    <string name="cd_increase">Increase</string>
+
+    <!-- Empty Warning Dialog -->
+    <string name="dialog_empty_title">Empty Questions</string>
+    <string name="dialog_empty_message">One or more questions have no text or image. An empty PDF with just the layout and total number of pages will be created for them. Do you want to proceed?</string>
+    <string name="btn_go_back">Go Back</string>
+    <string name="btn_proceed_anyway">Proceed Anyway</string>
+
+    <!-- PDF Preview Screen -->
+    <string name="preview_screen_title">QCAB PDF Preview</string>
+    <string name="btn_save_downloads">Save to Downloads</string>
+    <string name="btn_save_as">Save As</string>
+    <string name="btn_share_pdf">Share PDF</string>
+    <string name="cd_back">Navigate back</string>
+    <string name="msg_saved_downloads">Saved %1$s to Downloads</string>
+    <string name="msg_saved_location">PDF saved successfully</string>
+    <string name="msg_save_error">Could not save PDF: %1$s</string>
+    <string name="msg_share_error">Could not open share sheet: %1$s</string>
+    <string name="share_chooser_title">Share QCAB Booklet PDF</string>
+
+    <!-- Theme Mode -->
+    <string name="theme_mode_system">System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="cd_theme_mode_menu">Change theme mode</string>
+</resources>

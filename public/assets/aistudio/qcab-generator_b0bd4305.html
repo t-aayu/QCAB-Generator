@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC CSE QCAB Generator</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cline x1='16' y1='13' x2='8' y2='13'%3E%3C/line%3E%3Cline x1='16' y1='17' x2='8' y2='17'%3E%3C/line%3E%3Cpolyline points='10 9 9 9 8 9'%3E%3C/polyline%3E%3C/svg%3E">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue 3 for reactivity -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            background-attachment: fixed;
+        }
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        [v-cloak] {
+            display: none;
+        }
+        /* Smooth transitions for interactive elements */
+        .btn-animate {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-animate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-animate:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        /* Fade transition for elements */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <div id="fallback-error" style="display: none; min-height: 100vh; background-color: #fef2f2; color: #991b1b; padding: 3rem; text-align: center;">
+        <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">Failed to Load Application</h2>
+        <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.5;">
+            One or more required libraries (Tailwind, Vue, or jsPDF) could not be loaded. 
+            <br/><br/>
+            Please ensure you have an active internet connection or the correct local files.
+        </p>
+    </div>
+
+    <div id="app" v-cloak class="min-h-screen flex flex-col items-center">
+        <!-- Minimalist Gradient Header -->
+        <div class="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-8 shadow-lg mb-10 text-center border-b border-slate-700/50">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+                UPSC CSE QCAB Generator
+            </h1>
+            <p class="text-slate-400 mt-3 text-sm md:text-base font-medium tracking-wide uppercase letter-spacing-1">
+                Generate Standard Question cum Answer Booklets
+            </p>
+        </div>
+
+        <div class="w-full max-w-3xl px-4 pb-16">
+            <div v-if="step === 1" class="bg-white/95 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100">
+                <div class="mb-8 border-b border-slate-100 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-800">Test Configuration</h2>
+                    <p class="text-slate-500 text-sm mt-1">Set up your booklet's basic parameters.</p>
+                </div>
+                <form @submit.prevent="handleStartConfig">
+                    <div class="mb-7">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Test Name / Footer Stamp <span class="text-slate-400 font-normal ml-1">(Optional)</span>
+                        </label>
+                        <input
+                            type="text"
+                            v-model="testName"
+                            placeholder="e.g. VisionIAS-2024-GS1 (Leave blank for none)"
+                            class="w-full px-5 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all outline-none text-slate-700"
+                        />
+                        <p class="text-xs text-slate-400 mt-2 flex items-center">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            If provided, this appears at the bottom left of every page.
+                        </p>
+                    </div>
+
+                    <div class="mb-10">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Initial Number of Questions
+                        </label>
+                        <input
+                            type="number"
+                            required
+                            min="1"
+                            max="20"
+                            v-model="numQuestions"
+                            class="w-full px-5 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all outline-none text-slate-700"
+                        />
+                        <p class="text-xs text-slate-400 mt-2">
+                            Don't worry, you can add or remove questions on the next page without losing data.
+                        </p>
+                    </div>
+
+                    <div v-if="errorMessage" class="mb-8 p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-700 rounded-xl text-sm font-medium flex items-center">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {{ errorMessage }}
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-animate w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-md"
+                    >
+                        Continue to Questions &rarr;
+                    </button>
+                </form>
+            </div>
+
+            <div v-if="step === 2" class="space-y-6">
+                <!-- Status Bar -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/80 backdrop-blur-md p-4 px-5 rounded-2xl shadow-sm border border-slate-200 sticky top-4 z-20">
+                    <button 
+                        @click="step = 1"
+                        class="text-slate-500 hover:text-slate-900 font-semibold px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors flex items-center text-sm w-full sm:w-auto justify-center"
+                    >
+                        &larr; Back to Setup
+                    </button>
+                    <div class="font-bold text-slate-800 text-sm md:text-base flex items-center bg-slate-100 px-4 py-2 rounded-lg w-full sm:w-auto justify-center overflow-hidden">
+                        <span class="text-indigo-600 truncate max-w-[150px]">{{ testName || 'Untitled Test' }}</span> 
+                        <span class="text-slate-300 mx-3">|</span> 
+                        <span class="whitespace-nowrap">{{ questions.length }} Qs</span>
+                    </div>
+                </div>
+
+                <TransitionGroup name="fade" tag="div" class="space-y-6">
+                    <div v-for="(q, index) in questions" :key="q.id" class="bg-white/95 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-sm hover:shadow-md border border-slate-200 transition-shadow">
+                        <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                            <div class="flex items-center">
+                                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 text-indigo-700 font-black w-12 h-12 flex items-center justify-center rounded-2xl shadow-inner mr-4 text-xl">
+                                    {{ index + 1 }}
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800">Question Details</h3>
+                            </div>
+                            
+                            <!-- Remove Question Button -->
+                            <button 
+                                v-if="questions.length > 1"
+                                @click="removeQuestion(index)"
+                                class="text-slate-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-xl transition-colors"
+                                title="Remove this question"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-5">
+                            <!-- Text Input -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center justify-between">
+                                    <span>Question Text</span>
+                                    <div class="flex gap-2">
+                                        <button 
+                                            v-if="q.lastClearedType === 'text'" 
+                                            @click="undoClear(index)"
+                                            type="button"
+                                            class="text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-3 py-1 rounded-md text-xs font-bold border border-indigo-300 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+                                            title="Undo text clear"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                            Undo
+                                        </button>
+                                        <button 
+                                            v-if="q.imagePreview" 
+                                            @click="clearImage(index)"
+                                            type="button"
+                                            class="text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-md text-xs font-bold border border-amber-300 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+                                            title="Clear image to enable text input"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            Clear Image
+                                        </button>
+                                    </div>
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    v-model="q.qText"
+                                    @input="q.lastClearedType = null"
+                                    :disabled="!!q.imagePreview"
+                                    :class="q.imagePreview ? 'bg-slate-50 cursor-not-allowed text-slate-400 border-slate-200' : 'bg-white text-slate-800 border-slate-300 focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500'"
+                                    placeholder="Type the question content..."
+                                    class="w-full px-5 py-3 rounded-xl border transition-all outline-none resize-y"
+                                ></textarea>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="relative flex items-center py-2">
+                                <div class="flex-grow border-t border-slate-100"></div>
+                                <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold uppercase tracking-widest">OR</span>
+                                <div class="flex-grow border-t border-slate-100"></div>
+                            </div>
+
+                            <!-- Image Upload Input -->
+                            <div class="p-5 border-2 border-dashed rounded-xl transition-colors" :class="q.qText.trim().length > 0 ? 'border-slate-200 bg-slate-50/50 opacity-70' : 'border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/60'">
+                                <label class="block text-sm font-semibold text-slate-700 mb-3 flex items-center justify-between">
+                                    <span>Attach Image <span class="font-normal text-slate-500 text-xs ml-1">(Equations/Diagrams)</span></span>
+                                    <div class="flex gap-2">
+                                        <button 
+                                            v-if="q.lastClearedType === 'image'" 
+                                            @click="undoClear(index)"
+                                            type="button"
+                                            class="text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-3 py-1 rounded-md text-xs font-bold border border-indigo-300 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+                                            title="Undo image clear"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                            Undo
+                                        </button>
+                                        <button 
+                                            v-if="q.qText.trim().length > 0" 
+                                            @click="clearText(index)"
+                                            type="button"
+                                            class="text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1 rounded-md text-xs font-bold border border-amber-300 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+                                            title="Clear text to enable image upload"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            Clear Text
+                                        </button>
+                                    </div>
+                                </label>
+                                <input 
+                                    type="file" 
+                                    accept="image/png, image/jpeg, image/jpg"
+                                    @change="handleImageUpload($event, index)"
+                                    :disabled="q.qText.trim().length > 0"
+                                    :class="q.qText.trim().length > 0 ? 'cursor-not-allowed' : 'hover:file:bg-indigo-100 cursor-pointer'"
+                                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 transition-all outline-none"
+                                />
+                                
+                                <!-- Image Preview -->
+                                <div v-if="q.imagePreview" class="mt-4 relative inline-block group">
+                                    <img :src="q.imagePreview" class="max-h-40 rounded-lg border border-slate-200 shadow-sm" />
+                                    <button 
+                                        @click="clearImage(index)" 
+                                        class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-md hover:bg-red-600 hover:scale-110 transition-transform opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                        title="Remove Image"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Marks and Pages -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">Marks Stamp</label>
+                                    <input
+                                        type="text"
+                                        v-model="q.marks"
+                                        placeholder="e.g. 10 Marks, 2023"
+                                        class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">Pages Required</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        v-model="q.pages"
+                                        class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all outline-none"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </TransitionGroup>
+
+                <!-- Dynamic Add Question Button -->
+                <button 
+                    @click="addQuestion"
+                    :disabled="questions.length >= 20"
+                    :class="questions.length >= 20 ? 'opacity-50 cursor-not-allowed border-slate-200 bg-slate-50' : 'border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 bg-white/50'"
+                    class="w-full py-6 border-2 border-dashed rounded-3xl font-bold flex items-center justify-center gap-2 transition-all backdrop-blur-sm"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    {{ questions.length >= 20 ? 'Maximum Questions Reached (20)' : 'Add Another Question' }}
+                </button>
+
+                <!-- Floating Footer Action -->
+                <div class="sticky bottom-6 bg-white/90 backdrop-blur-xl p-5 rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-200/60 flex flex-col items-end gap-3 z-10 mt-8">
+                    <div v-if="pdfErrorMessage" class="w-full p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
+                        {{ pdfErrorMessage }}
+                    </div>
+                    <button
+                        @click="generatePDF"
+                        :disabled="isGenerating || questions.length === 0"
+                        :class="(isGenerating || questions.length === 0) ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30'"
+                        class="btn-animate w-full md:w-auto px-10 py-4 rounded-xl font-bold transition-all text-base flex items-center justify-center"
+                    >
+                        <svg v-if="!isGenerating" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <svg v-else class="animate-spin w-5 h-5 mr-2 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        {{ isGenerating ? "Building PDF..." : "Download QCAB PDF" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Warning Modal -->
+        <Transition name="fade">
+            <div v-if="showWarningModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-7 transform transition-all border border-slate-100">
+                    <div class="flex items-center gap-4 mb-4 text-amber-500">
+                        <div class="bg-amber-100 p-3 rounded-2xl">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Empty Questions</h3>
+                    </div>
+                    <p class="text-slate-600 mb-8 leading-relaxed">
+                        One or more questions have no text or image. An empty PDF with just the layout and total number of pages will be downloaded for them. Do you want to proceed?
+                    </p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="showWarningModal = false" class="btn-animate px-5 py-3 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                            Go Back
+                        </button>
+                        <button @click="proceedGeneratePDF" class="btn-animate px-5 py-3 rounded-xl font-semibold text-white bg-amber-500 hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/30">
+                            Proceed Anyway
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const step = ref(1);
+                const testName = ref(""); // Now optional
+                const numQuestions = ref(1);
+                const questions = ref([]);
+                const isGenerating = ref(false);
+                const errorMessage = ref("");
+                const pdfErrorMessage = ref("");
+                
+                let cachedPTSerifBase64 = null;
+
+                // Helper to create a new question object
+                const createQuestionObject = () => ({
+                    id: Date.now() + Math.random().toString(36).substr(2, 9), // Unique ID for keying
+                    qText: "",
+                    marks: "10 Marks",
+                    pages: 2,
+                    image: null,
+                    imagePreview: null,
+                    fileType: null,
+                    lastClearedType: null,
+                    savedText: "",
+                    savedImage: null,
+                    savedImagePreview: null,
+                    savedFileType: null
+                });
+
+                const handleStartConfig = () => {
+                    errorMessage.value = "";
+                    const targetCount = parseInt(numQuestions.value);
+                    
+                    if (targetCount < 1) {
+                        errorMessage.value = "Number of questions must be at least 1.";
+                        return;
+                    }
+                    if (targetCount > 20) {
+                        errorMessage.value = "Error: Maximum 20 questions can be generated at once.";
+                        return;
+                    }
+                    
+                    // Smart handling to preserve data if user goes back to Step 1 and changes count
+                    if (questions.value.length === 0) {
+                        // First time setup
+                        questions.value = Array.from({ length: targetCount }, createQuestionObject);
+                    } else {
+                        // Adjust existing array size without overwriting data
+                        if (targetCount > questions.value.length) {
+                            const diff = targetCount - questions.value.length;
+                            for (let i = 0; i < diff; i++) {
+                                questions.value.push(createQuestionObject());
+                            }
+                        } else if (targetCount < questions.value.length) {
+                            // Slice to reduce, data beyond targetCount is lost, but existing kept.
+                            questions.value = questions.value.slice(0, targetCount);
+                        }
+                    }
+                    
+                    step.value = 2;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const addQuestion = () => {
+                    if (questions.value.length >= 20) return;
+                    questions.value.push(createQuestionObject());
+                    numQuestions.value = questions.value.length; // Sync back to state
+                };
+
+                const removeQuestion = (index) => {
+                    if (questions.value.length > 1) {
+                        questions.value.splice(index, 1);
+                        numQuestions.value = questions.value.length; // Sync back to state
+                    }
+                };
+
+                const handleImageUpload = (event, index) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    if (!file.type.startsWith('image/')) {
+                        // Display error in page instead of alert
+                        pdfErrorMessage.value = "Please upload a valid image file (PNG, JPG, JPEG) for Question " + (index+1);
+                        setTimeout(() => { pdfErrorMessage.value = ""; }, 5000);
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        questions.value[index].image = e.target.result;
+                        questions.value[index].imagePreview = e.target.result;
+                        questions.value[index].lastClearedType = null;
+                        
+                        let fType = 'JPEG';
+                        if (file.type === 'image/png') fType = 'PNG';
+                        questions.value[index].fileType = fType;
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                const clearText = (index) => {
+                    const q = questions.value[index];
+                    q.savedText = q.qText;
+                    q.lastClearedType = 'text';
+                    q.qText = '';
+                };
+
+                const clearImage = (index) => {
+                    const q = questions.value[index];
+                    q.savedImage = q.image;
+                    q.savedImagePreview = q.imagePreview;
+                    q.savedFileType = q.fileType;
+                    q.lastClearedType = 'image';
+                    
+                    q.image = null;
+                    q.imagePreview = null;
+                    q.fileType = null;
+                    
+                    // Reset specific file input
+                    const inputs = document.querySelectorAll('input[type="file"]');
+                    if (inputs[index]) inputs[index].value = '';
+                };
+
+                const undoClear = (index) => {
+                    const q = questions.value[index];
+                    if (q.lastClearedType === 'text') {
+                        q.qText = q.savedText;
+                    } else if (q.lastClearedType === 'image') {
+                        q.image = q.savedImage;
+                        q.imagePreview = q.savedImagePreview;
+                        q.fileType = q.savedFileType;
+                    }
+                    q.lastClearedType = null;
+                };
+
+                const showWarningModal = ref(false);
+
+                const generatePDF = () => {
+                    if (questions.value.length === 0) return;
+                    
+                    const hasEmpty = questions.value.some(q => (!q.qText || q.qText.trim() === "") && !q.image);
+                    if (hasEmpty) {
+                        showWarningModal.value = true;
+                    } else {
+                        executePDFGeneration();
+                    }
+                };
+
+                const proceedGeneratePDF = () => {
+                    showWarningModal.value = false;
+                    executePDFGeneration();
+                };
+
+                const executePDFGeneration = async () => {
+                    isGenerating.value = true;
+                    pdfErrorMessage.value = "";
+                    
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ format: 'a4', unit: 'mm' });
+                        
+                        let mainFont = "times";
+                        try {
+                            if (!cachedPTSerifBase64) {
+                                const fontResponse = await fetch('https://fonts.gstatic.com/s/ptserif/v18/EJRVQgYoZZY2vCFuvDFRxL6ddA.ttf');
+                                if (fontResponse.ok) {
+                                    const buffer = await fontResponse.arrayBuffer();
+                                    let binary = '';
+                                    const bytes = new Uint8Array(buffer);
+                                    for (let i = 0; i < bytes.byteLength; i++) {
+                                        binary += String.fromCharCode(bytes[i]);
+                                    }
+                                    cachedPTSerifBase64 = window.btoa(binary);
+                                }
+                            }
+                            if (cachedPTSerifBase64) {
+                                doc.addFileToVFS('PTSerif-Regular.ttf', cachedPTSerifBase64);
+                                doc.addFont('PTSerif-Regular.ttf', 'PTSerif', 'normal');
+                                mainFont = "PTSerif";
+                            }
+                        } catch (fontError) {
+                            console.warn("Could not load PT Serif font, falling back to Times.");
+                        }
+
+                        const pageWidth = 210;
+                        const pageHeight = 297;
+                        
+                        const leftMargin = 25;
+                        const topMargin = 15;
+                        const rightMargin = pageWidth - 25; 
+                        const bottomMargin = pageHeight - 15; 
+
+                        const drawLayout = (footerMark) => {
+                            doc.setDrawColor(0, 0, 0);
+                            doc.setLineWidth(0.3);
+                            doc.line(leftMargin, topMargin, leftMargin, bottomMargin);
+                            doc.line(rightMargin, topMargin, rightMargin, bottomMargin);
+                            
+                            // Only draw footer if testName was provided
+                            if (footerMark && footerMark.trim() !== "") {
+                                doc.setFont("times", "italic");
+                                doc.setFontSize(12);
+                                doc.text(footerMark.trim(), leftMargin - 10, bottomMargin + 5);
+                            }
+                            
+                            doc.setFont("times", "normal");
+                            doc.setFontSize(9);
+                            const warningText = "Candidates must not write on this margin";
+                            const splitWarning = doc.splitTextToSize(warningText, 20);
+                            doc.text(splitWarning, rightMargin + 2, topMargin + 5);
+                        };
+
+                        questions.value.forEach((q, qIndex) => {
+                            const pages = parseInt(q.pages) || 1;
+                            
+                            for (let i = 0; i < pages; i++) {
+                                if (qIndex !== 0 || i !== 0) {
+                                    doc.addPage();
+                                }
+                                
+                                drawLayout(testName.value);
+
+                                if (i === 0) {
+                                    doc.setFont(mainFont, "normal");
+                                    doc.setFontSize(12);
+                                    doc.text(`Q. ${qIndex + 1}`, leftMargin - 15, topMargin + 5, { align: 'center' });
+
+                                    let currentY = topMargin + 5;
+                                    const qTextX = leftMargin + 2;
+                                    const qTextWidth = rightMargin - leftMargin - 4;
+
+                                    if (q.image) {
+                                        const imgProps = doc.getImageProperties(q.image);
+                                        const imgRatio = imgProps.width / imgProps.height;
+                                        
+                                        let renderWidth = qTextWidth;
+                                        let renderHeight = renderWidth / imgRatio;
+
+                                        const maxAvailableHeight = bottomMargin - currentY - 15;
+                                        if (renderHeight > maxAvailableHeight) {
+                                            renderHeight = maxAvailableHeight;
+                                            renderWidth = renderHeight * imgRatio;
+                                        }
+
+                                        doc.addImage(q.image, q.fileType, qTextX, currentY, renderWidth, renderHeight);
+                                        currentY += renderHeight + 5;
+                                    } else if (q.qText && q.qText.trim() !== "") {
+                                        doc.text(q.qText, qTextX, currentY, { maxWidth: qTextWidth, align: 'justify' });
+                                        const textDims = doc.getTextDimensions(q.qText, { maxWidth: qTextWidth });
+                                        currentY += textDims.h + 5;
+                                    }
+
+                                    if (q.marks) {
+                                        doc.text(`[${q.marks}]`, rightMargin - 2, currentY, { align: 'right' });
+                                    }
+                                }
+                            }
+                        });
+
+                        // Fallback filename if testName is empty
+                        const baseFileName = testName.value.trim() ? testName.value : "qcab_test";
+                        const safeFileName = baseFileName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        doc.save(`${safeFileName}.pdf`);
+                    } catch (error) {
+                        console.error("PDF Generation Error:", error);
+                        pdfErrorMessage.value = "An error occurred while generating the PDF: " + (error.message || "Unknown error");
+                    } finally {
+                        isGenerating.value = false;
+                    }
+                };
+
+                return {
+                    step,
+                    testName,
+                    numQuestions,
+                    questions,
+                    isGenerating,
+                    errorMessage,
+                    pdfErrorMessage,
+                    handleStartConfig,
+                    handleImageUpload,
+                    clearImage,
+                    clearText,
+                    undoClear,
+                    generatePDF,
+                    proceedGeneratePDF,
+                    showWarningModal,
+                    addQuestion,
+                    removeQuestion
+                };
+            }
+        }).mount('#app');
+    </script>
+
+    <script>
+        window.addEventListener('load', function() {
+            if (typeof Vue === 'undefined' || typeof window.jspdf === 'undefined' || typeof tailwind === 'undefined') {
+                document.getElementById('app').style.display = 'none';
+                document.getElementById('fallback-error').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

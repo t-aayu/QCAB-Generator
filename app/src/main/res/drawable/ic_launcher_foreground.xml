@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Crisp A4 Examination Booklet Sheet centered inside 66dp safe zone (21..87) -->
+    <path
+        android:fillColor="#FFF8FAFC"
+        android:pathData="M34,25 L62,25 L75,38 L75,80 C75,82.2 73.2,84 71,84 L34,84 C31.8,84 30,82.2 30,80 L30,29 C30,26.8 31.8,25 34,25 Z" />
+    <!-- Folded corner accent -->
+    <path
+        android:fillColor="#FFC7D2FE"
+        android:pathData="M62,25 L62,35 C62,36.7 63.3,38 65,38 L75,38 Z" />
+    <!-- Official QCAB left & right margin vertical rules -->
+    <path
+        android:fillColor="#FF4F46E5"
+        android:pathData="M37,31 L39.2,31 L39.2,78 L37,78 Z" />
+    <path
+        android:fillColor="#FF4F46E5"
+        android:pathData="M66.8,41 L69,41 L69,78 L66.8,78 Z" />
+    <!-- Question text lines -->
+    <path
+        android:fillColor="#FF1E293B"
+        android:pathData="M43,44 L63,44 L63,47.2 L43,47.2 Z" />
+    <path
+        android:fillColor="#FF334155"
+        android:pathData="M43,51 L63,51 L63,53.8 L43,53.8 Z" />
+    <path
+        android:fillColor="#FF64748B"
+        android:pathData="M43,57.5 L57,57.5 L57,60.3 L43,60.3 Z" />
+    <!-- Emerald QCAB Marks Stamp badge -->
+    <path
+        android:fillColor="#FF10B981"
+        android:pathData="M53,66 L63,66 C64.1,66 65,66.9 65,68 L65,71 C65,72.1 64.1,73 63,73 L53,73 C51.9,73 51,72.1 51,71 L51,68 C51,66.9 51.9,66 53,66 Z" />
+</vector>

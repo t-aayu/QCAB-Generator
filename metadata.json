@@ -1,0 +1,6 @@
+{
+  "name": "QCAB Generator",
+  "description": "Generate standard UPSC CSE Question cum Answer Booklets (QCAB) as printable A4 PDFs with official margins, text or diagram questions, marks stamps, and multi-page layouts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
